@@ -216,19 +216,20 @@ function updateParentSelect() {
 // ============================================
 
 function addMainMenuItem(item) {
-    // Validación: ID único
     if (menuData.some(i => i.id === item.id)) {
         showMessage('❌ Error: El ID ya existe', 'error');
         return false;
     }
 
-    // Validación: Enlace válido
-    if (!item.enlace.startsWith('/')) {
-        showMessage('❌ Error: El enlace debe comenzar con "/"', 'error');
+    // ✅ VALIDACIÓN DE ENLACE MEJORADA
+    const esRutaRelativa = item.enlace.startsWith('/');
+    const esUrlAbsoluta = item.enlace.startsWith('http://') || item.enlace.startsWith('https://');
+    
+    if (!esRutaRelativa && !esUrlAbsoluta) {
+        showMessage('❌ Error: El enlace debe comenzar con "/", "http://" o "https://"', 'error');
         return false;
     }
 
-    // Validación: Nombre no vacío
     if (!item.nombre.trim()) {
         showMessage('❌ Error: El nombre no puede estar vacío', 'error');
         return false;
@@ -239,30 +240,31 @@ function addMainMenuItem(item) {
     renderMenu();
     renderAdminLists();
     updateParentSelect();
+    updateXmlViewer();
     showMessage('✅ Menú principal agregado', 'success');
     return true;
 }
 
 function addSubMenuItem(item) {
-    // Validación: ID único
     if (menuData.some(i => i.id === item.id)) {
         showMessage('❌ Error: El ID ya existe', 'error');
         return false;
     }
 
-    // Validación: Padre existe
     if (!menuData.some(p => p.id === item.parentId && p.tipo === 'main')) {
         showMessage('❌ Error: El menú principal no existe', 'error');
         return false;
     }
 
-    // Validación: Enlace válido
-    if (!item.enlace.startsWith('/')) {
-        showMessage('❌ Error: El enlace debe comenzar con "/"', 'error');
+    // ✅ VALIDACIÓN DE ENLACE MEJORADA
+    const esRutaRelativa = item.enlace.startsWith('/');
+    const esUrlAbsoluta = item.enlace.startsWith('http://') || item.enlace.startsWith('https://');
+    
+    if (!esRutaRelativa && !esUrlAbsoluta) {
+        showMessage('❌ Error: El enlace debe comenzar con "/", "http://" o "https://"', 'error');
         return false;
     }
 
-    // Actualizar padre para que tenga submenú
     const parent = menuData.find(p => p.id === item.parentId);
     if (parent) {
         parent.hasSubmenu = true;
@@ -272,6 +274,8 @@ function addSubMenuItem(item) {
     saveMenuData();
     renderMenu();
     renderAdminLists();
+    updateParentSelect();
+    updateXmlViewer();
     showMessage('✅ Submenú agregado', 'success');
     return true;
 }
